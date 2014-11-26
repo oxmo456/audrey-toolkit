@@ -1,72 +1,116 @@
-function createOverlayElement(top, left, width, height, borderWidth) {
-    borderWidth = (typeof borderWidth === 'undefined') ? 6 : borderWidth;
-    var element = document.createElement('div');
-    var style = element.style;
-    top -= borderWidth;
-    left -= borderWidth;
-    style.position = 'absolute';
-    style.top = top + 'px';
-    style.left = left + 'px';
-    style.width = width + 'px';
-    style.height = height + 'px';
-    style.background = 'linear-gradient(90deg, transparent 50%, rgba(255,255,255,.8) 7%) 0 0,'+
-    'linear-gradient(245deg, transparent 50%, rgba(255,255,255,.8) 7%) 0 0,'+
-    'linear-gradient(90deg, transparent 50%, rgba(255,255,255,.8) 7%) 7px -15px,'+
-    'linear-gradient(245deg, transparent 50%, rgba(255,255,255,.8) 7%) 7px -15px,#36c';
-    style.backgroundColor = 'red';
-    style.backgroundSize = '3px 3px';
-    style.border = borderWidth + 'px solid red';
-    style.zIndex = 1000;
-    style.opacity = 0.8;
-    style.cursor = 'pointer';
-    style.mix
-    return element;
-}
+(function (window) {
 
-function overlayElementClick(e) {
+    function Main() {
 
-    window.open(e.target.data, '_blank');
+        var overlayElements = [];
 
-}
+        function createOverlayElement(top, left, width, height, borderWidth) {
+            borderWidth = (typeof borderWidth === 'undefined') ? 2 : borderWidth;
+            var element = document.createElement('div');
+            var style = element.style;
+            top -= borderWidth;
+            left -= borderWidth;
+            style.position = 'absolute';
+            style.top = top + 'px';
+            style.left = left + 'px';
+            style.width = width + 'px';
+            style.height = height + 'px';
+            style.borderRadius = '4px';
+            style.backgroundColor = 'rgba(255,0,0,0.5)';
+            style.backgroundSize = '3px 3px';
+            style.border = borderWidth + 'px solid red';
+            style.zIndex = 1000;
+            style.opacity = 0.8;
+            style.cursor = 'pointer';
+            style.mix
+            return element;
+        }
 
-var anchorElements = document.getElementsByTagName('a');
+        function overlayElementClick(e) {
+            window.open(e.target.title, '_blank');
+        }
 
-for (var i = 0, count = anchorElements.length; i < count; i++) {
-    var anchorElement = anchorElements[i];
-    var boundingRect = anchorElement.getBoundingClientRect();
-    var overlayElement = createOverlayElement(boundingRect.top + window.scrollY,
-        boundingRect.left + window.scrollX,
-        boundingRect.width,
-        boundingRect.height);
+        function anchorElementWrapAnImageElement(anchorElement) {
+            var result = false;
+            for (var i = 0, count = anchorElement.childNodes.length; i < count; i++) {
+                var child = anchorElement.childNodes[i];
+                if (child.nodeName !== '#text' && child.nodeName === 'IMG') {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
+        }
 
-    overlayElement.data = anchorElement.href;
+        this.showOverlays = function () {
+            this.hideOverlays();
 
-    overlayElement.addEventListener('click', overlayElementClick);
+            var anchorElements = document.getElementsByTagName('a');
 
-    document.body.appendChild(overlayElement);
-}
+            for (var i = 0, count = anchorElements.length; i < count; i++) {
+                var anchorElement = anchorElements[i];
+                if (anchorElementWrapAnImageElement(anchorElement)) {
+                    anchorElement.style.display = 'block';
+                }
+                var boundingRect = anchorElement.getBoundingClientRect();
+                var overlayElement = createOverlayElement(boundingRect.top + window.scrollY,
+                    boundingRect.left + window.scrollX,
+                    boundingRect.width,
+                    boundingRect.height);
+                overlayElement.title = anchorElement.href;
+                overlayElement.addEventListener('click', overlayElementClick);
+                document.body.appendChild(overlayElement);
+                overlayElements.push(overlayElement);
+            }
 
-var imageElements = document.querySelectorAll('img[usemap]');
+            var imageElements = document.querySelectorAll('img[usemap]');
 
-for (var i = 0, count = imageElements.length; i < count; i++) {
-    var imageElement = imageElements[i];
-    var boundingRect = imageElement.getBoundingClientRect();
-    var mapElement = document.getElementsByName(imageElement.useMap.replace('#', ''))[0];
-    var areaElements = mapElement.getElementsByTagName('area');
+            for (var i = 0, count = imageElements.length; i < count; i++) {
+                var imageElement = imageElements[i];
+                var boundingRect = imageElement.getBoundingClientRect();
+                var mapElement = document.getElementsByName(imageElement.useMap.replace('#', ''))[0];
+                var areaElements = mapElement.getElementsByTagName('area');
 
-    for (var j = 0, jCount = areaElements.length; j < jCount; j++) {
-        var areaElement = areaElements[j];
-        var areaCoordinates = areaElement.coords.split(',').map(function (value) {
-            return parseInt(value);
-        });
+                for (var j = 0, jCount = areaElements.length; j < jCount; j++) {
+                    var areaElement = areaElements[j];
+                    var areaCoordinates = areaElement.coords.split(',').map(function (value) {
+                        return parseInt(value);
+                    });
 
-        var overlayElement = createOverlayElement(boundingRect.top + window.scrollY + areaCoordinates[1],
-            boundingRect.left + window.scrollX + areaCoordinates[0],
-            areaCoordinates[2] - areaCoordinates[0],
-            areaCoordinates[3] - areaCoordinates[1]
-        );
+                    var overlayElement = createOverlayElement(boundingRect.top + window.scrollY + areaCoordinates[1],
+                        boundingRect.left + window.scrollX + areaCoordinates[0],
+                        areaCoordinates[2] - areaCoordinates[0],
+                        areaCoordinates[3] - areaCoordinates[1]
+                    );
 
-        document.body.appendChild(overlayElement);
+                    overlayElement.title = areaElement.href;
+                    overlayElement.addEventListener('click', overlayElementClick);
+                    document.body.appendChild(overlayElement);
+                    overlayElements.push(overlayElement);
+
+                }
+            }
+
+        };
+
+        this.hideOverlays = function () {
+            for (var i = 0, count = overlayElements.length; i < count; i++) {
+                var overlayElement = overlayElements[i];
+                overlayElement.removeEventListener('click', overlayElementClick);
+                document.body.removeChild(overlayElement);
+            }
+            overlayElements.length = 0;
+        };
+
 
     }
-}
+
+
+    window.main = new Main();
+
+})(window);
+
+
+
+
+
