@@ -5,7 +5,6 @@
     var tabsState = {};
 
     function resetTab(tabId) {
-        console.log('RESET TAB...');
         delete tabsState[tabId];
     }
 
