@@ -5,7 +5,7 @@
         var overlayElements = [];
 
         function createOverlayElement(top, left, width, height, borderWidth) {
-            borderWidth = (typeof borderWidth === 'undefined') ? 2 : borderWidth;
+            borderWidth = (typeof borderWidth === 'undefined') ? 4 : borderWidth;
             var element = document.createElement('div');
             var style = element.style;
             top -= borderWidth;
@@ -18,7 +18,7 @@
             style.borderRadius = '4px';
             style.backgroundColor = 'rgba(255,0,0,0.5)';
             style.backgroundSize = '3px 3px';
-            style.border = borderWidth + 'px solid red';
+            style.border = borderWidth + 'px dashed yellow';
             style.zIndex = 1000;
             style.opacity = 0.8;
             style.cursor = 'pointer';
